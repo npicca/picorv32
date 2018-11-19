@@ -30,9 +30,9 @@ module testbench;
 		$dumpfile("testbench.vcd");
 		$dumpvars(0, testbench);
 
-		repeat (6) begin
+		repeat (10000) begin
 			repeat (50000) @(posedge clk);
-			$display("+50000 cycles");
+		//	$display("+50000 cycles");
 		end
 		$finish;
 	end
@@ -41,9 +41,10 @@ module testbench;
 
 	always @(posedge clk) begin
 		cycle_cnt <= cycle_cnt + 1;
+		
 	end
 
-	wire [7:0] leds;
+	wire [31:0] leds;
 
 	wire ser_rx;
 	wire ser_tx;
@@ -56,7 +57,7 @@ module testbench;
 	wire flash_io3;
 
 	always @(leds) begin
-		#1 $display("%b", leds);
+		#1 $display("LEDS: %x", leds);
 	end
 
 	hx8kdemo uut (
@@ -83,8 +84,8 @@ module testbench;
 
 	reg [7:0] buffer;
 
-	always begin
-		@(negedge ser_tx);
+	always 
+		@(negedge ser_tx) begin
 
 		repeat (ser_half_period) @(posedge clk);
 		-> ser_sample; // start bit
@@ -100,9 +101,11 @@ module testbench;
 		repeat (ser_half_period) @(posedge clk);
 		-> ser_sample; // stop bit
 
-		if (buffer < 32 || buffer >= 127)
+		/*if (buffer < 32 || buffer >= 127)
 			$display("Serial data: %d", buffer);
 		else
-			$display("Serial data: '%c'", buffer);
+			$display("Serial data: '%c'", buffer);*/
+		$write("%c", buffer );
 	end
+
 endmodule

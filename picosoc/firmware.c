@@ -411,7 +411,7 @@ void cmd_benchmark_all()
 {
 	uint32_t instns = 0;
 
-	print("default        ");
+	print("default ");
 	reg_spictrl = (reg_spictrl & ~0x00700000) | 0x00000000;
 	print(": ");
 	print_hex(cmd_benchmark(false, &instns), 8);
@@ -550,111 +550,54 @@ void cmd_benchmark_all()
 }
 #endif
 
-// --------------------------------------------------------
+void foo(){
+	print("ciaone\n");
+}
+
 
 void main()
 {
-	reg_leds = 31;
 	reg_uart_clkdiv = 104;
-	print("Booting..\n");
+CIAO:
+	print("Booting.....\n");
+	
+	reg_leds = 0xdeadbeef;
+//	set_flash_qspi_flag();
+//	__asm__ volatile ("picorv32_timer_insn(a1, a2)");
+	register int *sp asm ("sp");
+	print("stack pointer:\n");
+	print_hex(sp,16);
+	print("\naccesso non allineato\n");
 
-	reg_leds = 63;
-	set_flash_qspi_flag();
-
-	reg_leds = 127;
-	while (getchar_prompt("Press ENTER to continue..\n") != '\r') { /* wait */ }
-
-	print("\n");
-	print("  ____  _          ____         ____\n");
-	print(" |  _ \\(_) ___ ___/ ___|  ___  / ___|\n");
-	print(" | |_) | |/ __/ _ \\___ \\ / _ \\| |\n");
-	print(" |  __/| | (_| (_) |__) | (_) | |___\n");
-	print(" |_|   |_|\\___\\___/____/ \\___/ \\____|\n");
-
-	while (1)
-	{
+	uint32_t* addr = 1;
+	*addr = 0xbeef;
+//	__asm__ volatile ("li x5, 0x500;"     /*200 in t0*/
+//			".word 0xa02828b;"   /*timer t0 zero*/
+			//"ebreak;");
+//			".word 0x800000b;"); /*waitirq zero*/
+//			//"li t0,0x001003e4;"
+			//"jalr x0, t0, 0");
+	//print("fatto cose");
+//	cmd_benchmark_all();
+	main();
+	print("fatto\n");
+	while(1){
+		print_hex(addr, 16);
 		print("\n");
-		print("\n");
-		print("SPI State:\n");
-
-		print("  LATENCY ");
-		print_dec((reg_spictrl >> 16) & 15);
-		print("\n");
-
-		print("  DDR ");
-		if ((reg_spictrl & (1 << 22)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("  QSPI ");
-		if ((reg_spictrl & (1 << 21)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("  CRM ");
-		if ((reg_spictrl & (1 << 20)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("\n");
-		print("Select an action:\n");
-		print("\n");
-		print("   [1] Read SPI Flash ID\n");
-		print("   [2] Read SPI Config Regs\n");
-		print("   [3] Switch to default mode\n");
-		print("   [4] Switch to Dual I/O mode\n");
-		print("   [5] Switch to Quad I/O mode\n");
-		print("   [6] Switch to Quad DDR mode\n");
-		print("   [7] Toggle continuous read mode\n");
-		print("   [9] Run simplistic benchmark\n");
-		print("   [0] Benchmark all configs\n");
-		print("\n");
-
-		for (int rep = 10; rep > 0; rep--)
-		{
-			print("Command> ");
-			char cmd = getchar();
-			if (cmd > 32 && cmd < 127)
-				putchar(cmd);
-			print("\n");
-
-			switch (cmd)
-			{
-			case '1':
-				cmd_read_flash_id();
-				break;
-			case '2':
-				cmd_read_flash_regs();
-				break;
-			case '3':
-				set_flash_mode_spi();
-				break;
-			case '4':
-				set_flash_mode_dual();
-				break;
-			case '5':
-				set_flash_mode_quad();
-				break;
-			case '6':
-				set_flash_mode_qddr();
-				break;
-			case '7':
-				reg_spictrl = reg_spictrl ^ 0x00100000;
-				break;
-			case '9':
-				cmd_benchmark(true, 0);
-				break;
-			case '0':
-				cmd_benchmark_all();
-				break;
-			default:
-				continue;
-			}
-
+		uint32_t t = *addr;
+		if(addr==0x2000){
+			print("finito");
 			break;
 		}
+		print("letto ");
+		print_hex(t, 16);
+		print("\n");
+		if(t!=0x8BADF00D){
+			print("error!!!\n");
+			print_hex(*addr, 16);
+			print("\n");
+		}
+		addr+=256;
 	}
+
 }

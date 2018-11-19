@@ -1,3 +1,6 @@
+YOSYSPATH=$(shell which icetime | xargs dirname)/..
+CELLSIM=$(YOSYSPATH)/share/yosys/ice40/cells_sim.v
+CHIPDB=$(YOSYSPATH)/share/icebox/chipdb-8k.txt
 
 # ---- iCE40 HX8K Breakout Board ----
 
@@ -23,7 +26,8 @@ hx8kdemo.asc: hx8kdemo.pcf hx8kdemo.blif
 	arachne-pnr -d 8k -o hx8kdemo.asc -p hx8kdemo.pcf hx8kdemo.blif
 
 hx8kdemo.bin: hx8kdemo.asc
-	icetime -d hx8k -c 12 -mtr hx8kdemo.rpt hx8kdemo.asc
+	# icetime -d hx8k -c 12 -mtr hx8kdemo.rpt hx8kdemo.asc
+	icetime -C $(CHIPDB) -d hx8k hx8kdemo.asc
 	icepack hx8kdemo.asc hx8kdemo.bin
 
 hx8kprog: hx8kdemo.bin hx8kdemo_fw.bin
@@ -34,7 +38,7 @@ hx8kprog_fw: hx8kdemo_fw.bin
 	iceprog -o 1M hx8kdemo_fw.bin
 
 hx8kdemo_fw.elf: sections.lds start.s firmware.c
-	riscv32-unknown-elf-gcc -DHX8KDEMO -march=rv32imc -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c
+	riscv32-unknown-elf-gcc -DHX8KDEMO -march=rv32i -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c irq.c #todo togli irq 
 
 hx8kdemo_fw.hex: hx8kdemo_fw.elf
 	riscv32-unknown-elf-objcopy -O verilog hx8kdemo_fw.elf hx8kdemo_fw.hex
@@ -77,7 +81,7 @@ icebprog_fw: icebreaker_fw.bin
 	iceprog -o 1M icebreaker_fw.bin
 
 icebreaker_fw.elf: sections.lds start.s firmware.c
-	riscv32-unknown-elf-gcc -DICEBREAKER -march=rv32ic -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s firmware.c
+	riscv32-unknown-elf-gcc -DICEBREAKER -march=rv32i -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s firmware.c irq.c #todo togli
 
 icebreaker_fw.hex: icebreaker_fw.elf
 	riscv32-unknown-elf-objcopy -O verilog icebreaker_fw.elf icebreaker_fw.hex
