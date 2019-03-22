@@ -63,13 +63,14 @@ module picosoc (
 );
 	parameter [0:0] BARREL_SHIFTER = 1;
 	parameter [0:0] ENABLE_MULDIV = 1;
-	parameter [0:0] ENABLE_COMPRESSED = 0;
+	parameter [0:0] ENABLE_COMPRESSED = 1;
 	parameter [0:0] ENABLE_COUNTERS = 1;
 	parameter [0:0] ENABLE_IRQ_QREGS = 1;
 
 	parameter integer MEM_WORDS = 2048;
 	parameter [31:0] STACKADDR = (4*MEM_WORDS);       // end of memory
 	parameter [31:0] PROGADDR_RESET = 32'h 0010_0000; // 1 MB into flash
+//	parameter [31:0] PROGADDR_RESET = 32'h 0010_58c4; // TODO: fixme
 	parameter [31:0] PROGADDR_IRQ = 32'h 0010_0010;
 
 	reg [31:0] irq;
@@ -218,15 +219,14 @@ module picosoc_regs (
 	output [31:0] rdata1,
 	output [31:0] rdata2
 );
-	reg [31:0] regs [0:31];
+	reg [31:0] regs [0:63];
 
 	always @(posedge clk)
-		if (wen) regs[waddr[4:0]] <= wdata;
+		if (wen) regs[waddr[5:0]] <= wdata;
 
-	assign rdata1 = regs[raddr1[4:0]];
-	assign rdata2 = regs[raddr2[4:0]];
+	assign rdata1 = regs[raddr1[5:0]];
+	assign rdata2 = regs[raddr2[5:0]];
 endmodule
-
 module picosoc_mem #(
 	parameter integer WORDS = 2048
 ) (

@@ -4,6 +4,11 @@ CHIPDB=$(YOSYSPATH)/share/icebox/chipdb-8k.txt
 
 # ---- iCE40 HX8K Breakout Board ----
 
+main.hex: main.elf
+	 riscv32-miosix-elf-objcopy -O verilog main.elf main.hex
+miosix_sim: hx8kdemo_tb.vvp main.hex
+	 vvp -N $< +firmware=main.hex
+
 hx8ksim: hx8kdemo_tb.vvp hx8kdemo_fw.hex
 	vvp -N $< +firmware=hx8kdemo_fw.hex
 
@@ -38,7 +43,7 @@ hx8kprog_fw: hx8kdemo_fw.bin
 	iceprog -o 1M hx8kdemo_fw.bin
 
 hx8kdemo_fw.elf: sections.lds start.s firmware.c
-	riscv32-unknown-elf-gcc -DHX8KDEMO -march=rv32i -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c irq.c #todo togli irq 
+	riscv32-unknown-elf-gcc -DHX8KDEMO -march=rv32imc -Wl,-Bstatic,-T,sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c irq.c #todo togli irq 
 
 hx8kdemo_fw.hex: hx8kdemo_fw.elf
 	riscv32-unknown-elf-objcopy -O verilog hx8kdemo_fw.elf hx8kdemo_fw.hex

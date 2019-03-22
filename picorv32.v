@@ -22,8 +22,7 @@
 // `define DEBUGNETS
 // `define DEBUGREGS
 // `define DEBUGASM
-// `define DEBUG
-
+ `define DEBUG
 `ifdef DEBUG
   `define debug(debug_command) debug_command
 `else
@@ -821,7 +820,7 @@ module picorv32 #(
 `ifdef DEBUGASM
 	always @(posedge clk) begin
 		if (dbg_next) begin
-			$display("debugasm %x %x %s", dbg_insn_addr, dbg_insn_opcode, dbg_ascii_instr ? dbg_ascii_instr : "*");
+			$display("%x: %x\t%s", dbg_insn_addr, dbg_insn_opcode, dbg_ascii_instr ? dbg_ascii_instr : "*");
 		end
 	end
 `endif
