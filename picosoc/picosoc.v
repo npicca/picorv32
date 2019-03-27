@@ -67,10 +67,9 @@ module picosoc (
 	parameter [0:0] ENABLE_COUNTERS = 1;
 	parameter [0:0] ENABLE_IRQ_QREGS = 1;
 
-	parameter integer MEM_WORDS = 2048;
+	parameter integer MEM_WORDS = 3072;
 	parameter [31:0] STACKADDR = (4*MEM_WORDS);       // end of memory
 	parameter [31:0] PROGADDR_RESET = 32'h 0010_0000; // 1 MB into flash
-//	parameter [31:0] PROGADDR_RESET = 32'h 0010_58c4; // TODO: fixme
 	parameter [31:0] PROGADDR_IRQ = 32'h 0010_0010;
 
 	reg [31:0] irq;

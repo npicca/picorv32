@@ -6,8 +6,19 @@ CHIPDB=$(YOSYSPATH)/share/icebox/chipdb-8k.txt
 
 main.hex: main.elf
 	 riscv32-miosix-elf-objcopy -O verilog main.elf main.hex
+	
+main.bin: main.elf
+	 riscv32-miosix-elf-objcopy -O binary main.elf main.bin
+
 miosix_sim: hx8kdemo_tb.vvp main.hex
 	 vvp -N $< +firmware=main.hex
+
+miosix_prog: main.bin
+	iceprog -o 1M main.bin
+
+miosix_prog_fw: hx8kdemo.bin main.bin
+	iceprog hx8kdemo.bin
+	iceprog -o 1M main.bin
 
 hx8ksim: hx8kdemo_tb.vvp hx8kdemo_fw.hex
 	vvp -N $< +firmware=hx8kdemo_fw.hex

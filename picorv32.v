@@ -22,7 +22,7 @@
 // `define DEBUGNETS
 // `define DEBUGREGS
 // `define DEBUGASM
- `define DEBUG
+//`define DEBUG
 `ifdef DEBUG
   `define debug(debug_command) debug_command
 `else
@@ -627,6 +627,7 @@ module picorv32 #(
 	// Instruction Decoder
 
 	reg instr_lui, instr_auipc, instr_jal, instr_jalr;
+	reg instr_fence;
 	reg instr_beq, instr_bne, instr_blt, instr_bge, instr_bltu, instr_bgeu;
 	reg instr_lb, instr_lh, instr_lw, instr_lbu, instr_lhu, instr_sb, instr_sh, instr_sw;
 	reg instr_addi, instr_slti, instr_sltiu, instr_xori, instr_ori, instr_andi, instr_slli, instr_srli, instr_srai;
@@ -659,7 +660,7 @@ module picorv32 #(
 	reg is_compare;
 
 	assign instr_trap = (CATCH_ILLINSN || WITH_PCPI) && !{instr_lui, instr_auipc, instr_jal, instr_jalr,
-			instr_beq, instr_bne, instr_blt, instr_bge, instr_bltu, instr_bgeu,
+			instr_beq, instr_bne, instr_blt, instr_bge, instr_bltu, instr_bgeu, instr_fence,
 			instr_lb, instr_lh, instr_lw, instr_lbu, instr_lhu, instr_sb, instr_sh, instr_sw,
 			instr_addi, instr_slti, instr_sltiu, instr_xori, instr_ori, instr_andi, instr_slli, instr_srli, instr_srai,
 			instr_add, instr_sub, instr_sll, instr_slt, instr_sltu, instr_xor, instr_srl, instr_sra, instr_or, instr_and,
@@ -682,6 +683,8 @@ module picorv32 #(
 
 	always @* begin
 		new_ascii_instr = "";
+
+		if (instr_fence)    new_ascii_instr = "fence";
 
 		if (instr_lui)      new_ascii_instr = "lui";
 		if (instr_auipc)    new_ascii_instr = "auipc";
@@ -1017,6 +1020,8 @@ module picorv32 #(
 
 		if (decoder_trigger && !decoder_pseudo_trigger) begin
 			pcpi_insn <= WITH_PCPI ? mem_rdata_q : 'bx;
+
+			instr_fence <= mem_rdata_q[31:0] == 32'h0ff0000f;
 
 			instr_beq   <= is_beq_bne_blt_bge_bltu_bgeu && mem_rdata_q[14:12] == 3'b000;
 			instr_bne   <= is_beq_bne_blt_bge_bltu_bgeu && mem_rdata_q[14:12] == 3'b001;

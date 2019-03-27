@@ -100,12 +100,14 @@ module testbench;
 		repeat (ser_half_period) @(posedge clk);
 		repeat (ser_half_period) @(posedge clk);
 		-> ser_sample; // stop bit
-
-		/*if (buffer < 32 || buffer >= 127)
-			$display("Serial data: %d", buffer);
+/*
+		if (buffer < 32 || buffer >= 127)
+			//$display("Serial data: %d", buffer);
+			$display("%d", buffer);
 		else
-			$display("Serial data: '%c'", buffer);*/
-		$write("%c", buffer );
+		//	$display("Serial data: '%c'", buffer);
+			$display("%c", buffer); */
+		$write("%c", buffer);
 	end
 
 endmodule
