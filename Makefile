@@ -1,12 +1,13 @@
 
 RISCV_GNU_TOOLCHAIN_GIT_REVISION = c3ad555
+RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX = /opt/riscv32
 
 SHELL = bash
 TEST_OBJS = $(addsuffix .o,$(basename $(wildcard tests/*.S)))
 FIRMWARE_OBJS = firmware/start.o firmware/irq.o firmware/print.o firmware/sieve.o firmware/multest.o firmware/stats.o
 GCC_WARNS  = -Werror -Wall -Wextra -Wshadow -Wundef -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings
 GCC_WARNS += -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes -pedantic # -Wconversion
-TOOLCHAIN_PREFIX = riscv32-unknown-elf-
+TOOLCHAIN_PREFIX = $(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)i/bin/riscv32-unknown-elf-
 COMPRESSED_ISA = C
 
 # Add things like "export http_proxy=... https_proxy=..." here
@@ -69,7 +70,7 @@ testbench_synth.vvp: testbench.v synth.v
 	iverilog -o $@ -DSYNTH_TEST $^
 	chmod -x $@
 
-testbench_verilator: testbench.v picorv32.v
+testbench_verilator: testbench.v picorv32.v testbench.cc
 	verilator --cc --exe -Wno-lint -trace --top-module picorv32_wrapper testbench.v picorv32.v testbench.cc \
 			$(subst C,-DCOMPRESSED_ISA,$(COMPRESSED_ISA)) --Mdir testbench_verilator_dir
 	$(MAKE) -C testbench_verilator_dir -f Vpicorv32_wrapper.mk
@@ -115,7 +116,7 @@ tests/%.o: tests/%.S tests/riscv_test.h tests/test_macros.h
 
 download-tools:
 	sudo bash -c 'set -ex; mkdir -p /var/cache/distfiles; $(GIT_ENV); \
-	$(foreach REPO,riscv-gnu-toolchain riscv-binutils-gdb riscv-dejagnu riscv-gcc riscv-glibc riscv-newlib riscv-qemu, \
+	$(foreach REPO,riscv-gnu-toolchain riscv-binutils-gdb riscv-gcc riscv-glibc riscv-newlib, \
 		if ! test -d /var/cache/distfiles/$(REPO).git; then rm -rf /var/cache/distfiles/$(REPO).git.part; \
 			git clone --bare https://github.com/riscv/$(REPO) /var/cache/distfiles/$(REPO).git.part; \
 			mv /var/cache/distfiles/$(REPO).git.part /var/cache/distfiles/$(REPO).git; else \
@@ -131,20 +132,16 @@ build-$(1)-tools-bh:
 	+set -ex; $(GIT_ENV); \
 	if [ -d /var/cache/distfiles/riscv-gnu-toolchain.git ]; then reference_riscv_gnu_toolchain="--reference /var/cache/distfiles/riscv-gnu-toolchain.git"; else reference_riscv_gnu_toolchain=""; fi; \
 	if [ -d /var/cache/distfiles/riscv-binutils-gdb.git ]; then reference_riscv_binutils_gdb="--reference /var/cache/distfiles/riscv-binutils-gdb.git"; else reference_riscv_binutils_gdb=""; fi; \
-	if [ -d /var/cache/distfiles/riscv-dejagnu.git ]; then reference_riscv_dejagnu="--reference /var/cache/distfiles/riscv-dejagnu.git"; else reference_riscv_dejagnu=""; fi; \
 	if [ -d /var/cache/distfiles/riscv-gcc.git ]; then reference_riscv_gcc="--reference /var/cache/distfiles/riscv-gcc.git"; else reference_riscv_gcc=""; fi; \
 	if [ -d /var/cache/distfiles/riscv-glibc.git ]; then reference_riscv_glibc="--reference /var/cache/distfiles/riscv-glibc.git"; else reference_riscv_glibc=""; fi; \
 	if [ -d /var/cache/distfiles/riscv-newlib.git ]; then reference_riscv_newlib="--reference /var/cache/distfiles/riscv-newlib.git"; else reference_riscv_newlib=""; fi; \
-	if [ -d /var/cache/distfiles/riscv-qemu.git ]; then reference_riscv_qemu="--reference /var/cache/distfiles/riscv-qemu.git"; else reference_riscv_qemu=""; fi; \
 	rm -rf riscv-gnu-toolchain-$(1); git clone $$$$reference_riscv_gnu_toolchain https://github.com/riscv/riscv-gnu-toolchain riscv-gnu-toolchain-$(1); \
 	cd riscv-gnu-toolchain-$(1); git checkout $(RISCV_GNU_TOOLCHAIN_GIT_REVISION); \
 	git submodule update --init $$$$reference_riscv_binutils_gdb riscv-binutils; \
 	git submodule update --init $$$$reference_riscv_binutils_gdb riscv-gdb; \
-	git submodule update --init $$$$reference_riscv_dejagnu riscv-dejagnu; \
 	git submodule update --init $$$$reference_riscv_gcc riscv-gcc; \
 	git submodule update --init $$$$reference_riscv_glibc riscv-glibc; \
 	git submodule update --init $$$$reference_riscv_newlib riscv-newlib; \
-	git submodule update --init $$$$reference_riscv_qemu riscv-qemu; \
 	mkdir build; cd build; ../configure --with-arch=$(2) --prefix=$(RISCV_GNU_TOOLCHAIN_INSTALL_PREFIX)$(subst riscv32,,$(1)); make
 
 .PHONY: build-$(1)-tools
