@@ -45,7 +45,7 @@ module hx8kdemo (
 	reg [5:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;
 
-	always @(posedge clk) begin
+	always @(posedge sysclk) begin
 		reset_cnt <= reset_cnt + !resetn;
 	end
 
@@ -63,7 +63,9 @@ module hx8kdemo (
 		.D_OUT_0({flash_io3_do, flash_io2_do, flash_io1_do, flash_io0_do}),
 		.D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
 	);
-
+	wire       sysclk;
+	wire       locked;
+	pll myPLL (.clock_in(clk), .global_clock(sysclk), .locked(locked));
 	wire        iomem_valid;
 	reg         iomem_ready;
 	wire [3:0]  iomem_wstrb;
@@ -74,7 +76,7 @@ module hx8kdemo (
 	reg [31:0] gpio;
 	assign leds = gpio;
 
-	always @(posedge clk) begin
+	always @(posedge sysclk) begin
 		if (!resetn) begin
 			gpio <= 0;
 		end else begin
@@ -91,7 +93,7 @@ module hx8kdemo (
 	end
 
 	picosoc soc (
-		.clk          (clk         ),
+		.clk          (sysclk      ),
 		.resetn       (resetn      ),
 
 		.ser_tx       (ser_tx      ),

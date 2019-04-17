@@ -107,7 +107,9 @@ module testbench;
 		else
 		//	$display("Serial data: '%c'", buffer);
 			$display("%c", buffer); */
-		$write("%c", buffer);
+		`ifndef DEBUG
+			$write("%c", buffer);
+		`endif
 	end
 
 endmodule

@@ -46,15 +46,15 @@ reset_vec:
 irq_vec:
 	/* save registers */
 
+	/*li x29, 0x03000000
+	sw x1, 0(x29)
+	sw x2, 0(x29)*/
 #ifdef ENABLE_QREGS
 	
-	li x29, 0x03000000
-	sw x1, 0(x29)
-	sw x2, 0(x29)
-	picorv32_getq_insn(x28, q0)
+	/*picorv32_getq_insn(x28, q0)
 	sw x28, 0(x29)
 	picorv32_getq_insn(x28, q1)
-	sw x28, 0(x29)
+	sw x28, 0(x29)*/
 	picorv32_setq_insn(q2, ra) //move ra register to q2
 	picorv32_setq_insn(q3, sp) //move sp register to q3
 

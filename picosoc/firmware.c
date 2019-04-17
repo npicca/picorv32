@@ -180,10 +180,20 @@ void print_hex(uint32_t v, int digits)
 
 void print_dec(uint32_t v)
 {
-	if (v >= 100) {
-		print(">=100");
+	if (v >= 1000) {
+		print(">=1000");
 		return;
 	}
+
+	if      (v >= 900) { putchar('9'); v -= 900; }
+	else if (v >= 800) { putchar('8'); v -= 800; }
+	else if (v >= 700) { putchar('7'); v -= 700; }
+	else if (v >= 600) { putchar('6'); v -= 600; }
+	else if (v >= 500) { putchar('5'); v -= 500; }
+	else if (v >= 400) { putchar('4'); v -= 400; }
+	else if (v >= 300) { putchar('3'); v -= 300; }
+	else if (v >= 200) { putchar('2'); v -= 200; }
+	else if (v >= 100) { putchar('1'); v -= 100; }
 
 	if      (v >= 90) { putchar('9'); v -= 90; }
 	else if (v >= 80) { putchar('8'); v -= 80; }
@@ -238,6 +248,95 @@ char getchar_prompt(char *prompt)
 char getchar()
 {
 	return getchar_prompt(0);
+}
+
+void cmd_print_spi_state()
+{
+	print("SPI State:\n");
+
+	print("  LATENCY ");
+	print_dec((reg_spictrl >> 16) & 15);
+	print("\n");
+
+	print("  DDR ");
+	if ((reg_spictrl & (1 << 22)) != 0)
+		print("ON\n");
+	else
+		print("OFF\n");
+
+	print("  QSPI ");
+	if ((reg_spictrl & (1 << 21)) != 0)
+		print("ON\n");
+	else
+		print("OFF\n");
+
+	print("  CRM ");
+	if ((reg_spictrl & (1 << 20)) != 0)
+		print("ON\n");
+	else
+		print("OFF\n");
+}
+
+uint32_t xorshift32(uint32_t *state)
+{
+	/* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs" */
+	uint32_t x = *state;
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	*state = x;
+
+	return x;
+}
+
+void cmd_memtest()
+{
+	int cyc_count = 5;
+	int stride = 256;
+	uint32_t state;
+
+	volatile uint32_t *base_word = (uint32_t *) 0;
+	volatile uint8_t *base_byte = (uint8_t *) 0;
+
+	print("Running memtest ");
+
+	// Walk in stride increments, word access
+	for (int i = 1; i <= cyc_count; i++) {
+		state = i;
+
+		for (int word = 0; word < MEM_TOTAL / sizeof(int); word += stride) {
+			*(base_word + word) = xorshift32(&state);
+		}
+
+		state = i;
+
+		for (int word = 0; word < MEM_TOTAL / sizeof(int); word += stride) {
+			if (*(base_word + word) != xorshift32(&state)) {
+				print(" ***FAILED WORD*** at ");
+				print_hex(4*word, 4);
+				print("\n");
+				return;
+			}
+		}
+
+		print(".");
+	}
+
+	// Byte access
+	for (int byte = 0; byte < 128; byte++) {
+		*(base_byte + byte) = (uint8_t) byte;
+	}
+
+	for (int byte = 0; byte < 128; byte++) {
+		if (*(base_byte + byte) != (uint8_t) byte) {
+			print(" ***FAILED BYTE*** at ");
+			print_hex(byte, 4);
+			print("\n");
+			return;
+		}
+	}
+
+	print(" passed\n");
 }
 
 // --------------------------------------------------------
@@ -415,7 +514,7 @@ void cmd_benchmark_all()
 {
 	uint32_t instns = 0;
 
-	print("default ");
+	print("default        ");
 	reg_spictrl = (reg_spictrl & ~0x00700000) | 0x00000000;
 	print(": ");
 	print_hex(cmd_benchmark(false, &instns), 8);
@@ -554,24 +653,21 @@ void cmd_benchmark_all()
 }
 #endif
 
-void foo(){
-	print("ciaone\n");
+void cmd_echo()
+{
+	print("Return to menu by sending '!'\n\n");
+	char c;
+	while ((c = getchar()) != '!')
+		putchar(c);
 }
 
+// --------------------------------------------------------
 
 void main()
 {
-	reg_uart_clkdiv = 104;
-CIAO:
-	print("Booting.....\n");
-	
-	reg_leds = 0xdeadbeef;
-//	set_flash_qspi_flag();
-//	__asm__ volatile ("picorv32_timer_insn(a1, a2)");
-	register int *sp asm ("sp");
-	print("stack pointer:\n");
-	print_hex(sp,16);
-	print("\naccesso non allineato\n");
+	reg_leds = 31;
+	reg_uart_clkdiv = 192;
+	print("Booting..\n");
 
 	reg_leds = 63;
 	set_flash_qspi_flag();
@@ -585,43 +681,23 @@ CIAO:
 	print(" | |_) | |/ __/ _ \\___ \\ / _ \\| |\n");
 	print(" |  __/| | (_| (_) |__) | (_) | |___\n");
 	print(" |_|   |_|\\___\\___/____/ \\___/ \\____|\n");
+	print("\n");
+
+	print("Total memory: ");
+	print_dec(MEM_TOTAL / 1024);
+	print(" KiB\n");
+	print("\n");
+
+	cmd_memtest();
+	print("\n");
+
+	cmd_print_spi_state();
+	print("\n");
 
 	while (1)
 	{
 		print("\n");
-		uint32_t t = *addr;
-		if(addr==0x2000){
-			print("finito");
-			break;
-		}
-		print("letto ");
-		print_hex(t, 16);
-		print("\n");
-		print("SPI State:\n");
 
-		print("  LATENCY ");
-		print_dec((reg_spictrl >> 16) & 15);
-		print("\n");
-
-		print("  DDR ");
-		if ((reg_spictrl & (1 << 22)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("  QSPI ");
-		if ((reg_spictrl & (1 << 21)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("  CRM ");
-		if ((reg_spictrl & (1 << 20)) != 0)
-			print("ON\n");
-		else
-			print("OFF\n");
-
-		print("\n");
 		print("Select an action:\n");
 		print("\n");
 		print("   [1] Read SPI Flash ID\n");
@@ -633,6 +709,9 @@ CIAO:
 		print("   [7] Toggle continuous read mode\n");
 		print("   [9] Run simplistic benchmark\n");
 		print("   [0] Benchmark all configs\n");
+		print("   [M] Run Memtest\n");
+		print("   [S] Print SPI state\n");
+		print("   [e] Echo UART\n");
 		print("\n");
 
 		for (int rep = 10; rep > 0; rep--)
@@ -672,13 +751,20 @@ CIAO:
 			case '0':
 				cmd_benchmark_all();
 				break;
+			case 'M':
+				cmd_memtest();
+				break;
+			case 'P':
+				cmd_print_spi_state();
+				break;
+			case 'e':
+				cmd_echo();
+				break;
 			default:
 				continue;
 			}
 
 			break;
 		}
-		addr+=256;
 	}
-
 }
