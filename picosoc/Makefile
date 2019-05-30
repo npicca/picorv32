@@ -30,7 +30,7 @@ hx8kdemo.blif: hx8kdemo.v spimemio.v simpleuart.v picosoc.v ../picorv32.v pll.v
 	yosys -ql hx8kdemo.log -p 'synth_ice40 -top hx8kdemo -blif hx8kdemo.blif' $^
 
 hx8kdemo_tb.vvp: hx8kdemo_tb.v hx8kdemo.v spimemio.v simpleuart.v picosoc.v ../picorv32.v spiflash.v
-	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
+	iverilog -s testbench -o $@ -DSIM $^ `yosys-config --datdir/ice40/cells_sim.v`
 
 hx8kdemo_syn_tb.vvp: hx8kdemo_tb.v hx8kdemo_syn.v spiflash.v
 	iverilog -s testbench -o $@ $^ `yosys-config --datdir/ice40/cells_sim.v`
@@ -39,7 +39,7 @@ hx8kdemo_syn.v: hx8kdemo.blif
 	yosys -p 'read_blif -wideports hx8kdemo.blif; write_verilog hx8kdemo_syn.v'
 
 hx8kdemo.asc: hx8kdemo.pcf hx8kdemo.blif
-	arachne-pnr -d 8k -o hx8kdemo.asc -p hx8kdemo.pcf hx8kdemo.blif
+	arachne-pnr -r -d 8k -o hx8kdemo.asc -p hx8kdemo.pcf hx8kdemo.blif
 
 hx8kdemo.bin: hx8kdemo.asc
 	# icetime -d hx8k -c 12 -mtr hx8kdemo.rpt hx8kdemo.asc

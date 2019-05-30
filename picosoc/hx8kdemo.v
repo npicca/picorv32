@@ -62,10 +62,16 @@ module hx8kdemo (
 		.OUTPUT_ENABLE({flash_io3_oe, flash_io2_oe, flash_io1_oe, flash_io0_oe}),
 		.D_OUT_0({flash_io3_do, flash_io2_do, flash_io1_do, flash_io0_do}),
 		.D_IN_0({flash_io3_di, flash_io2_di, flash_io1_di, flash_io0_di})
-	);
-	wire       sysclk;
-	wire       locked;
-	pll myPLL (.clock_in(clk), .global_clock(sysclk), .locked(locked));
+		);
+
+	`ifndef SIM
+		wire       sysclk;
+		wire       locked;
+		pll myPLL (.clock_in(clk), .global_clock(sysclk), .locked(locked));
+	`else
+		wire sysclk = clk;
+	`endif
+
 	wire        iomem_valid;
 	reg         iomem_ready;
 	wire [3:0]  iomem_wstrb;
