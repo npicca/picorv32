@@ -35,6 +35,11 @@ addi x29, zero, 0
 addi x30, zero, 0
 addi x31, zero, 0
 
+#this makes the usable stack smaller
+#but in simulation the memory initialization
+#is much faster
+#todo: remove
+li sp, 0x1000
 # Update LEDs
 li a0, 0x03000000
 li a1, 1
