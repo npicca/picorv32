@@ -2,13 +2,15 @@ YOSYSPATH=$(shell which icetime | xargs dirname)/..
 CELLSIM=$(YOSYSPATH)/share/yosys/ice40/cells_sim.v
 CHIPDB=$(YOSYSPATH)/share/icebox/chipdb-8k.txt
 
+GCC-BASE=/home/nico/CS587/riscv-gnu-toolchain/out/bin/riscv32-unknown-elf
+
 # ---- iCE40 HX8K Breakout Board ----
 
 main.hex: main.elf
-	 riscv32-miosix-elf-objcopy -O verilog main.elf main.hex
+	 $(GCC-BASE)-objcopy -O verilog main.elf main.hex
 	
 main.bin: main.elf
-	 riscv32-miosix-elf-objcopy -O binary main.elf main.bin
+	 $(GCC-BASE)-objcopy -O binary main.elf main.bin
 
 miosix_sim: hx8kdemo_tb.vvp main.hex
 	 vvp -N $< +firmware=main.hex
@@ -54,16 +56,16 @@ hx8kprog_fw: hx8kdemo_fw.bin
 	iceprog -o 1M hx8kdemo_fw.bin
 
 hx8kdemo_sections.lds: sections.lds
-	riscv32-unknown-elf-cpp -P -DHX8KDEMO -o $@ $^
+	$(GCC-BASE)-cpp -P -DHX8KDEMO -o $@ $^
 
 hx8kdemo_fw.elf: hx8kdemo_sections.lds start.s firmware.c
-	riscv32-unknown-elf-gcc -DHX8KDEMO -march=rv32imc -Wl,-Bstatic,-T,hx8kdemo_sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c
+	$(GCC-BASE)-gcc -DHX8KDEMO -march=rv32imc -Wl,-Bstatic,-T,hx8kdemo_sections.lds,--strip-debug -ffreestanding -nostdlib -o hx8kdemo_fw.elf start.s firmware.c
 
 hx8kdemo_fw.hex: hx8kdemo_fw.elf
-	riscv32-unknown-elf-objcopy -O verilog hx8kdemo_fw.elf hx8kdemo_fw.hex
+	$(GCC-BASE)-objcopy -O verilog hx8kdemo_fw.elf hx8kdemo_fw.hex
 
 hx8kdemo_fw.bin: hx8kdemo_fw.elf
-	riscv32-unknown-elf-objcopy -O binary hx8kdemo_fw.elf hx8kdemo_fw.bin
+	$(GCC-BASE)-objcopy -O binary hx8kdemo_fw.elf hx8kdemo_fw.bin
 
 # ---- iCE40 IceBreaker Board ----
 
@@ -100,16 +102,16 @@ icebprog_fw: icebreaker_fw.bin
 	iceprog -o 1M icebreaker_fw.bin
 
 icebreaker_sections.lds: sections.lds
-	riscv32-unknown-elf-cpp -P -DICEBREAKER -o $@ $^
+	$(GCC-BASE)-cpp -P -DICEBREAKER -o $@ $^
 
 icebreaker_fw.elf: icebreaker_sections.lds start.s firmware.c
-	riscv32-unknown-elf-gcc -DICEBREAKER -march=rv32ic -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s firmware.c
+	$(GCC-BASE)-gcc -DICEBREAKER -march=rv32ic -Wl,-Bstatic,-T,icebreaker_sections.lds,--strip-debug -ffreestanding -nostdlib -o icebreaker_fw.elf start.s firmware.c
 
 icebreaker_fw.hex: icebreaker_fw.elf
-	riscv32-unknown-elf-objcopy -O verilog icebreaker_fw.elf icebreaker_fw.hex
+	$(GCC-BASE)-objcopy -O verilog icebreaker_fw.elf icebreaker_fw.hex
 
 icebreaker_fw.bin: icebreaker_fw.elf
-	riscv32-unknown-elf-objcopy -O binary icebreaker_fw.elf icebreaker_fw.bin
+	$(GCC-BASE)-objcopy -O binary icebreaker_fw.elf icebreaker_fw.bin
 
 # ---- Testbench for SPI Flash Model ----
 

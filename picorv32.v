@@ -150,14 +150,14 @@
               function [7:0] crc8;
                 input [31:0] data_in;
                 begin
-                    crc8[0] = 1 ^ 1 ^ 1 ^ data_in[0] ^ data_in[6] ^ data_in[7] ^ data_in[8] ^ data_in[12] ^ data_in[14] ^ data_in[16] ^ data_in[18] ^ data_in[19] ^ data_in[21] ^ data_in[23] ^ data_in[28] ^ data_in[30] ^ data_in[31];
-                    crc8[1] = 1 ^ 1 ^ 1 ^ 1 ^ data_in[0] ^ data_in[1] ^ data_in[6] ^ data_in[9] ^ data_in[12] ^ data_in[13] ^ data_in[14] ^ data_in[15] ^ data_in[16] ^ data_in[17] ^ data_in[18] ^ data_in[20] ^ data_in[21] ^ data_in[22] ^ data_in[23] ^ data_in[24] ^ data_in[28] ^ data_in[29] ^ data_in[30];
-                    crc8[2] = 1 ^ 1 ^ 1 ^ 1 ^ data_in[0] ^ data_in[1] ^ data_in[2] ^ data_in[6] ^ data_in[8] ^ data_in[10] ^ data_in[12] ^ data_in[13] ^ data_in[15] ^ data_in[17] ^ data_in[22] ^ data_in[24] ^ data_in[25] ^ data_in[28] ^ data_in[29];
-                    crc8[3] = 1 ^ 1 ^ 1 ^ 1 ^ data_in[1] ^ data_in[2] ^ data_in[3] ^ data_in[7] ^ data_in[9] ^ data_in[11] ^ data_in[13] ^ data_in[14] ^ data_in[16] ^ data_in[18] ^ data_in[23] ^ data_in[25] ^ data_in[26] ^ data_in[29] ^ data_in[30];
-                    crc8[4] = 1 ^ 1 ^ 1 ^ 1 ^ 1 ^ data_in[2] ^ data_in[3] ^ data_in[4] ^ data_in[8] ^ data_in[10] ^ data_in[12] ^ data_in[14] ^ data_in[15] ^ data_in[17] ^ data_in[19] ^ data_in[24] ^ data_in[26] ^ data_in[27] ^ data_in[30] ^ data_in[31];
-                    crc8[5] = 1 ^ 1 ^ 1 ^ 1 ^ data_in[3] ^ data_in[4] ^ data_in[5] ^ data_in[9] ^ data_in[11] ^ data_in[13] ^ data_in[15] ^ data_in[16] ^ data_in[18] ^ data_in[20] ^ data_in[25] ^ data_in[27] ^ data_in[28] ^ data_in[31];
-                    crc8[6] = 1 ^ 1 ^ 1 ^ data_in[4] ^ data_in[5] ^ data_in[6] ^ data_in[10] ^ data_in[12] ^ data_in[14] ^ data_in[16] ^ data_in[17] ^ data_in[19] ^ data_in[21] ^ data_in[26] ^ data_in[28] ^ data_in[29];
-                    crc8[7] = 1 ^ 1 ^ 1 ^ data_in[5] ^ data_in[6] ^ data_in[7] ^ data_in[11] ^ data_in[13] ^ data_in[15] ^ data_in[17] ^ data_in[18] ^ data_in[20] ^ data_in[22] ^ data_in[27] ^ data_in[29] ^ data_in[30];
+                    crc8[0] = data_in[0] ^ data_in[6] ^ data_in[7] ^ data_in[8] ^ data_in[12] ^ data_in[14] ^ data_in[16] ^ data_in[18] ^ data_in[19] ^ data_in[21] ^ data_in[23] ^ data_in[28] ^ data_in[30] ^ data_in[31];
+                    crc8[1] = data_in[0] ^ data_in[1] ^ data_in[6] ^ data_in[9] ^ data_in[12] ^ data_in[13] ^ data_in[14] ^ data_in[15] ^ data_in[16] ^ data_in[17] ^ data_in[18] ^ data_in[20] ^ data_in[21] ^ data_in[22] ^ data_in[23] ^ data_in[24] ^ data_in[28] ^ data_in[29] ^ data_in[30];
+                    crc8[2] = data_in[0] ^ data_in[1] ^ data_in[2] ^ data_in[6] ^ data_in[8] ^ data_in[10] ^ data_in[12] ^ data_in[13] ^ data_in[15] ^ data_in[17] ^ data_in[22] ^ data_in[24] ^ data_in[25] ^ data_in[28] ^ data_in[29];
+                    crc8[3] = data_in[1] ^ data_in[2] ^ data_in[3] ^ data_in[7] ^ data_in[9] ^ data_in[11] ^ data_in[13] ^ data_in[14] ^ data_in[16] ^ data_in[18] ^ data_in[23] ^ data_in[25] ^ data_in[26] ^ data_in[29] ^ data_in[30];
+                    crc8[4] = data_in[2] ^ data_in[3] ^ data_in[4] ^ data_in[8] ^ data_in[10] ^ data_in[12] ^ data_in[14] ^ data_in[15] ^ data_in[17] ^ data_in[19] ^ data_in[24] ^ data_in[26] ^ data_in[27] ^ data_in[30] ^ data_in[31];
+                    crc8[5] = data_in[3] ^ data_in[4] ^ data_in[5] ^ data_in[9] ^ data_in[11] ^ data_in[13] ^ data_in[15] ^ data_in[16] ^ data_in[18] ^ data_in[20] ^ data_in[25] ^ data_in[27] ^ data_in[28] ^ data_in[31];
+                    crc8[6] = data_in[4] ^ data_in[5] ^ data_in[6] ^ data_in[10] ^ data_in[12] ^ data_in[14] ^ data_in[16] ^ data_in[17] ^ data_in[19] ^ data_in[21] ^ data_in[26] ^ data_in[28] ^ data_in[29];
+                    crc8[7] = data_in[5] ^ data_in[6] ^ data_in[7] ^ data_in[11] ^ data_in[13] ^ data_in[15] ^ data_in[17] ^ data_in[18] ^ data_in[20] ^ data_in[22] ^ data_in[27] ^ data_in[29] ^ data_in[30];
                 end
               endfunction
 
@@ -251,17 +251,6 @@
 			      reg        pcpi_int_wait;
 			      reg        pcpi_int_ready;
 
-/*
-            reg [31:0] crc_in;
-            wire [7:0] crc_out;
-
-            crc8 crc8(
-                .clk (clk ),
-                .rst (resetn),
-                .data_in (crc_in),
-                .crc_out (crc_out)
-                  );
-*/
 
 			      generate if (ENABLE_FAST_MUL) begin
 				      picorv32_pcpi_fast_mul pcpi_mul (
@@ -882,8 +871,8 @@ always @(posedge clk) begin
 		instr_retirq  <= mem_rdata_latched[6:0] == 7'b0001011 && mem_rdata_latched[31:25] == 7'b0000010 && ENABLE_IRQ;
 		instr_waitirq <= mem_rdata_latched[6:0] == 7'b0001011 && mem_rdata_latched[31:25] == 7'b0000100 && ENABLE_IRQ;
 
-    //auth: 31..29=0 28..27=0 14..12=2 6..2=0x0B 1..0=3
-    is_packey_pac_auth_xpac      <= mem_rdata_latched[6:0] == 7'b0101111;
+    //auth: 31..29=0 28..27=0 14..12=2 6..2=0x0A 1..0=3
+    is_packey_pac_auth_xpac      <= mem_rdata_latched[6:0] == 7'b0101011;
 
     is_beq_bne_blt_bge_bltu_bgeu <= mem_rdata_latched[6:0] == 7'b1100011;
 		is_lb_lh_lw_lbu_lhu          <= mem_rdata_latched[6:0] == 7'b0000011;

@@ -103,13 +103,13 @@ r_type_insn(0b0000101, 0, regnum_ ## _rs, 0b110, regnum_ ## _rd, 0b0001011)
 
 
 #define picorv32_xpac_insn(_rd, _rs) \
-r_type_insn(0b0000000, 0, regnum_ ## _rs, 0b111, regnum_ ## _rd, 0b0101111)
+r_type_insn(0b0000000, 0, regnum_ ## _rs, 0b111, regnum_ ## _rd, 0b0101011)
 
 #define picorv32_pac_insn(_rd, _rs1, _rs2) \
-r_type_insn(0b0000000, regnum_ ## _rs2, regnum_ ## _rs1, 0b101, regnum_ ## _rd, 0b0101111)
+r_type_insn(0b0000000, regnum_ ## _rs2, regnum_ ## _rs1, 0b101, regnum_ ## _rd, 0b0101011)
 
 #define picorv32_auth_insn(_rd, _rs1, _rs2) \
-r_type_insn(0b0000000, regnum_ ## _rs2, regnum_ ## _rs1, 0b100, regnum_ ## _rd, 0b0101111)
+r_type_insn(0b0000000, regnum_ ## _rs2, regnum_ ## _rs1, 0b100, regnum_ ## _rd, 0b0101011)
 
 #define picorv32_packey_insn(_rs) \
-r_type_insn(0b0000000, 0, regnum_ ## _rs, 0b110, 0, 0b0101111)
+r_type_insn(0b0000000, 0, regnum_ ## _rs, 0b110, 0, 0b0101011)
