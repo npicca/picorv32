@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "custom_ops.h"
+#include <string.h>
 
 #ifdef ICEBREAKER
 #  define MEM_TOTAL 0x20000 /* 128 KB */
@@ -664,6 +665,38 @@ void cmd_echo()
 }
 
 // --------------------------------------------------------
+//
+//
+
+void unreach(){
+	for(;;){
+		print("hacked\n");
+	}
+	return;
+}
+
+void myMemCpy(int *dest, size_t n) 
+{ 
+       for (int i=0; i<n; i++) 
+	       dest[i] = unreach; 
+} 
+
+
+void vuln(){
+	int buffer[2];
+	myMemCpy(buffer, 10);
+}
+
+void func1(){
+	vuln();
+}
+
+
+void auth_failure(){
+	for(;;){
+		print("nice try, hacker\n");
+	}
+}
 
 void main()
 {
@@ -676,30 +709,10 @@ void main()
 	set_flash_qspi_flag();
 
 	reg_leds = 127;
-	//while (getchar_prompt("Press ENTER to continue..\n") != '\r') { /* wait */ }
-	//
-	//
-	asm volatile("li t0, 0xdeadbeef");	
-	picorv32_packey_insn(t0);
-	picorv32_pac_insn(fp,fp,sp);
-	picorv32_xpac_insn(t0,fp)
-	picorv32_auth_insn(t1,fp,sp);
 
-	for(;;){}
+	func1();
 
-	print("  ____  _          ____         ____\n");
-	print(" |  _ \\(_) ___ ___/ ___|  ___  / ___|\n");
-	print(" | |_) | |/ __/ _ \\___ \\ / _ \\| |\n");
-	print(" |  __/| | (_| (_) |__) | (_) | |___\n");
-	print(" |_|   |_|\\___\\___/____/ \\___/ \\____|\n");
-	print("\n");
-
-	print("Total memory: ");
-	print_dec(MEM_TOTAL / 1024);
-	print(" KiB\n");
-	print("\n");
-
-	cmd_memtest();
-	print("\n");
-
+	for(;;){
+		print("end of main\n");
+	}
 }
